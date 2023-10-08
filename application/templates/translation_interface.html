@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Translation Interface</title>
+    <!-- Aquí puedes incluir tus estilos CSS u otras configuraciones de encabezado -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        label, select, textarea {
+            margin-bottom: 10px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 8px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #translation_result {
+            margin-top: 20px;
+        }
+
+        /* Estilo para el indicador de carga */
+        .loading-indicator {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        /* Estilo para el spinner de carga */
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Animación del spinner de carga */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Contenido de la página 'Translation Interface' aquí -->
+    <h1>Translation Interface</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        <label for="input_text">Input Text:</label>
+        <textarea name="input_text" id="input_text" rows="4" cols="50"></textarea>
+        
+        <label for="original_language">Select source language:</label>
+        <select name="original_language" id="original_language">
+            {% for language, code in available_languages.items %}
+            <option value="{{ code }}">{{ language }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="target_language">Select target language:</label>
+        <select name="target_language" id="target_language">
+            {% for language, code in available_languages.items %}
+            <option value="{{ code }}">{{ language }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="button-container">
+        <button type="submit">Translate</button>
+        <button type="button" id="detect_language_button">Detect Language</button>
+        </div>
+    </form>
+    
+    <div id="translation_result">
+        <!-- Resultado de la traducción se mostrará aquí -->
+        <label for="translated_text">Translated Text:</label>
+        <textarea name="translated_text" id="translated_text" rows="4" cols="50" readonly></textarea>
+    </div>
+
+    <!-- Indicador de carga -->
+    <div id="loading_indicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        Loading...
+    </div>
+    <p><a href="{% url 'home' %}">Go back to main page</a></p>
+
+    <!-- JavaScript -->
+    <script>
+        // Get the URL of the Django translation view
+        const translationUrl = "{% url 'translation_interface' %}";
+
+        // Handle the form submission using JavaScript
+        document.querySelector('form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const inputText = document.querySelector('#input_text').value;
+            const originalLanguage = document.querySelector('#original_language').value;
+            const targetLanguage = document.querySelector('#target_language').value;
+            
+            // Mostrar el indicador de carga
+            const loadingIndicator = document.querySelector('#loading_indicator');
+            loadingIndicator.style.display = 'flex';
+
+            // Realizar la solicitud de traducción
+            const response = await fetch(translationUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: `input_text=${encodeURIComponent(inputText)}&original_language=${encodeURIComponent(originalLanguage)}&target_language=${encodeURIComponent(targetLanguage)}`,
+            });
+
+            const data = await response.json();
+            const translatedText = document.querySelector('#translated_text');
+            translatedText.value = data.translated_text;
+
+            // Ocultar el indicador de carga después de completar la traducción
+            loadingIndicator.style.display = 'none';
+        });
+
+    document.querySelector('#detect_language_button').addEventListener('click', async function() {
+    const inputText = document.querySelector('#input_text').value;
+    if (inputText.trim() === '') {
+        alert('Put some text in order to detect the language');
+        return;
+    }
+
+    const detectLanguageUrl = "{% url 'detect_language' %}";
+
+    // Show the loading indicator
+    const loadingIndicator = document.querySelector('#loading_indicator');
+    loadingIndicator.style.display = 'flex';
+
+    const response = await fetch(detectLanguageUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: `input_text=${encodeURIComponent(inputText)}`,
+    });
+
+    // Hide the loading indicator after completing language detection
+    loadingIndicator.style.display = 'none';
+
+    if (response.ok) {
+        // Process the JSON response
+        const data = await response.json();
+        alert(`Detected language: ${data.detected_language}`);
+    } else {
+        alert('Error detecting language');
+    }
+});
+    </script>
+</body>
+</html>

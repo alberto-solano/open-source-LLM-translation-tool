@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document Translator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .upload-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .document-table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+        .document-table th, .document-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .document-table th {
+            background-color: #f2f2f2;
+        }
+        .logo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 100px; /* Ajusta el ancho según tus necesidades */
+        }
+    </style>
+</head>
+<body>
+    <img src="{% static 'images/logo.jpeg' %}" alt="Company Logo" class="logo">
+    <h1>Document Translation Service</h1>
+    <p>Welcome to our Document Translation Service. Upload your documents for translation and access your translated documents here.</p>
+
+    <table class="document-table">
+        <thead>
+            <tr>
+                <th>Document Name</th>
+                <th>Translation Date (UTC)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for translation in translations %}
+            <tr>
+                <td><a href="{% url 'serve_translated_document' translation.translated_document.name %}">{{ translation.translated_document.name }}</a></td>
+                <td>{{ translation.translation_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Botón para eliminar todos los registros con confirmación -->
+    <button id="delete-all-button">Delete All Registries</button>
+
+    <script>
+        var deleteAllButton = document.getElementById("delete-all-button");
+
+        deleteAllButton.addEventListener("click", function() {
+            if (confirm("Are you sure you want to delete all registries?")) {
+                // Confirmación confirmada, enviar solicitud POST
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "{% url 'delete_all_translations' %}", true);
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        // Manejar la respuesta, por ejemplo, recargar la página
+                        window.location.reload();
+                    }
+                };
+                xhr.send();
+            }
+        });
+    </script>
+
+    <a href="{% url 'translator' %}" class="upload-button">Upload a Document for Translation</a>
+    <a href="{% url 'translation_interface' %}" class="upload-button">Translation Interface</a>
+</body>
+</html>

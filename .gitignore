@@ -1,0 +1,7 @@
+models/*
+output/*
+input/tmp/*
+venv
+**.egg-info
+__pycache__/
+**/.DS_Store

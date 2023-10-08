@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Translator App - Upload Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        input[type="file"] {
+            display: block;
+            margin-bottom: 10px;
+        }
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+
+    <script>
+        function showTranslatingMessage() {
+            var translatingMessage = document.getElementById("translating-message");
+            var spinner = document.createElement("span");
+            spinner.className = "spinner";
+            translatingMessage.innerHTML = "Translating document... ";
+            translatingMessage.appendChild(spinner);
+            translatingMessage.style.display = "inline";
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload a Document for Translation</h1>
+
+    <form method="POST" enctype="multipart/form-data" onsubmit="showTranslatingMessage()">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.translated_document.label_tag }}
+        <input type="file" name="translated_document">
+        {{ form.translated_document.help_text }}
+        {{ form.translated_document.errors }}
+        
+        <label for="target_language">Select target language:</label>
+        <select name="target_language" id="target_language">
+            {% for language, code in available_languages.items %}
+            <option value="{{ code }}">{{ language }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Translate</button>
+    </form>
+    
+    <div id="translating-message" style="display: none;"></div>
+
+    <p><a href="{% url 'home' %}">Go back to main page</a></p>
+</body>
+</html>
