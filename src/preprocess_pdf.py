@@ -92,23 +92,24 @@ def preprocess_text(doc_filepath, language):
     for page, image in enumerate(images):
         # extract paragraphs and its coordinates
         bounds = reader.readtext(image, detail=1, paragraph=True)
+        # blank page exception
+        if bounds:
+            # gather the info for each paragraph
+            for paragraph in bounds:
+                text_list.append(paragraph[1])
+                page_list.append(page + 1)
+                # bbox
+                xmin, ymin = paragraph[0][0]
+                xmax, ymax = paragraph[0][2]
+                x_min_list.append(xmin)
+                y_min_list.append(ymin)
+                x_max_list.append(xmax)
+                y_max_list.append(ymax)
+                height_list.append(ymax - ymin)
+                width_list.append(xmax - xmin)
 
-        # gather the info for each paragraph
-        for paragraph in bounds:
-            text_list.append(paragraph[1])
-            page_list.append(page + 1)
-            # bbox
-            xmin, ymin = paragraph[0][0]
-            xmax, ymax = paragraph[0][2]
-            x_min_list.append(xmin)
-            y_min_list.append(ymin)
-            x_max_list.append(xmax)
-            y_max_list.append(ymax)
-            height_list.append(ymax - ymin)
-            width_list.append(xmax - xmin)
-
-        # update the page
-        page += 1
+            # update the page
+            page += 1
 
     # convert into a pandas dataframe
     ocr_data = pd.DataFrame(

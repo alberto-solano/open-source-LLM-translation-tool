@@ -62,10 +62,8 @@ def overwrite_text_on_images(document):
     # tmp folder contains the images extracted from the pdf so we will iter
     # over them
 
-    images = [file for file in os.listdir(img_path) if file.endswith(".png")]
-    pdf_file = [
-        file for file in os.listdir(img_path) if file.endswith(".pdf")
-    ][0]
+    images = [file for file in os.listdir(img_path) if file.endswith(".png") and file.startswith('page_')]
+    pdf_file = [file for file in os.listdir(img_path) if file.endswith(".pdf")][0]
     translated_images = []
     print("Overriting text on PDF images...")
     # images are named 'page_i.png', order the image list
@@ -80,6 +78,9 @@ def overwrite_text_on_images(document):
         page = int(image.split(".")[0].replace("page_", ""))
         # filter for the boxes on the page
         aux = document[document.page == page]
+        # blank page case
+        if len(aux) < 1:
+            continue
         # overlaping correction
         aux = overalapping_correction(aux)
         # iter over the boxes of that page
