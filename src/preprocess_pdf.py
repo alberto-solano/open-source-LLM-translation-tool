@@ -22,9 +22,10 @@ def convert_pdf2image(doc_filepath):
     filepath = os.path.abspath(__file__)
     projpath = os.path.abspath(os.path.join(filepath, "..", ".."))
     tmp_path = os.path.join(projpath, "input", "tmp")
+    poppler_path = os.path.join(projpath, "poppler-0.68.8/bin/")
 
     # Store Pdf with convert_from_path function
-    images = convert_from_path(doc_filepath)
+    images = convert_from_path(doc_filepath, poppler_path=poppler_path)
 
     # list of filepaths to the images
     img_list = []

@@ -1,7 +1,7 @@
 import fasttext
 import os
 from unidecode import unidecode
-from pytesseract import image_to_string
+import pytesseract
 from PIL import Image
 from transformers import AutoModelForSeq2SeqLM
 
@@ -138,6 +138,12 @@ def detect_language_from_images(img_list, page_limit=5):
     language : str
         Inferred language
     """
+
+    filepath = os.path.abspath(__file__)
+    projpath = os.path.abspath(os.path.join(filepath, "..", ".."))
+    tesseract_path = os.path.join(projpath, "Tesseract-OCR", "tesseract.exe")
+
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
     # prevent error on little docs
     limit = min(page_limit, len(img_list))
 
@@ -148,7 +154,7 @@ def detect_language_from_images(img_list, page_limit=5):
     # iterate over each of the images
     for image in img_list[:limit]:
         im = Image.open(image)
-        text_from_image = image_to_string(im)
+        text_from_image = pytesseract.image_to_string(im)
         # append to the cummulative string
         complete_text.append(text_from_image)
 
@@ -164,7 +170,7 @@ def load_model(model_path):
     Parameters
     ----------
     model_path : str
-        Path in whic the model is stored
+        Path in which the model is stored
 
     Returns
     -------
