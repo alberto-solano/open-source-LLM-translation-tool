@@ -1,0 +1,16 @@
+django
+easyocr
+fasttext
+numpy
+opencv-python
+pandas
+pdf2image
+Pillow
+pytesseract
+python-docx
+python-pptx
+tqdm
+transformers
+unidecode
+wget
+xlsxwriter
